@@ -60,17 +60,41 @@ def save_record(table, values):
 # СТРАНИЦЫ ПРИЛОЖЕНИЯ
 # ==========================================
 def page_home():
-    st.markdown(f"<h1 style='text-align: center; color: #2e6c80;'>{T['site_title']}</h1>", unsafe_allow_html=True)
-    st.markdown(f"<h4 style='text-align: center;'>{T['site_subtitle']}</h4>", unsafe_allow_html=True)
-    st.write("---")
-    st.info("👈 **Пожалуйста, выберите ваш личный кабинет в боковом меню слева.**")
-    st.write("---")
-    st.markdown(f"👥 **{T['contacts_title']}**")
-    st.markdown("""
-    * **ФИО:** Абдуллаева Ардақ Шығайқызы
-    * **Телефон / WhatsApp:** +77787954638
-    * **Email:** ardak.abdullayeva@aktau7.edu.kz
-    """)
+    kz = st.session_state.language == "Қазақша"
+    st.markdown("""<style>
+    [data-testid="stAppViewContainer"] {
+      background: radial-gradient(circle at 92% 8%, #d8ccff 0, transparent 36%),
+                  radial-gradient(circle at 8% 85%, #b8e9e4 0, transparent 38%), #f7f8ff;
+    }
+    [data-testid="stHeader"] {background:transparent;}
+    .birge-hero {padding:clamp(26px,5vw,56px); border-radius:28px;
+      background:linear-gradient(125deg,#6542ac 0%,#536ec3 52%,#248b93 100%);
+      color:white; box-shadow:0 16px 36px rgba(58,54,114,.15); margin:12px 0 32px;}
+    .birge-hero h1 {color:white; font-size:clamp(44px,7vw,76px); line-height:1.1; margin:0 0 14px; letter-spacing:-2px;}
+    .birge-hero h2 {color:#fff; font-size:clamp(23px,3vw,34px); margin:0 0 22px; font-weight:500;}
+    .birge-hero p {font-size:19px; color:#eef5ff; max-width:760px; line-height:1.6; margin:0;}
+    [data-testid="stPageLink"] {background:#ffffff; border:1px solid #dde0ef; border-radius:16px; padding:15px 20px; margin:8px 0; box-shadow:0 5px 16px rgba(49,67,95,.05);}
+    [data-testid="stPageLink"]:hover {background:#e9f4f1; border-color:#5a9693;}
+    [data-testid="stSidebar"] {background:#edf0fb;}
+    </style>""", unsafe_allow_html=True)
+    subtitle = "Диагноздан нәтижеге дейін" if kz else "От диагноза к результату"
+    intro = "Мұғалімдер, мамандар және отбасының бірлескен жұмысына арналған кеңістік." if kz else "Пространство для совместной работы педагогов, специалистов и семьи."
+    st.markdown(f'<section class="birge-hero"><h1>Бірге</h1><h2>{subtitle}</h2><p>{intro}</p></section>', unsafe_allow_html=True)
+    st.subheader("Жеке кабинетіңізді таңдаңыз" if kz else "Выберите свой кабинет")
+    st.caption("Кабинетке кіріп, бақылау картасын толтырыңыз." if kz else "Войдите в кабинет и заполните карту наблюдений.")
+    left, right = st.columns(2)
+    with left:
+        st.page_link(PAGES["teacher"], label="Сынып жетекшісі" if kz else "Классный руководитель", icon="🏫")
+        st.page_link(PAGES["logo"], label="Логопед", icon="🗣️")
+    with right:
+        st.page_link(PAGES["psych"], label="Психолог", icon="🧠")
+        st.page_link(PAGES["def"], label="Дефектолог", icon="🎓")
+    st.page_link(PAGES["admin"], label="Консилиум жетекшісі" if kz else "Руководитель консилиума", icon="📋")
+    with st.expander("Жоба авторы және байланыс" if kz else "Автор проекта и контакты"):
+        st.write("Абдуллаева Ардақ Шығайқызы")
+        st.write("Школа-лицей №7 имени Н. Марабаева")
+        st.write("Телефон / WhatsApp: +77787954638")
+        st.write("Email: ardak.abdullayeva@aktau7.edu.kz")
 
 def render_history_tab(table_name, name_col, role_title):
     rows = st.session_state.records[table_name]
@@ -205,19 +229,17 @@ def page_admin():
 # ==========================================
 # ЗАПУСК НАВИГАЦИИ (STREAMLIT 1.36+)
 # ==========================================
+PAGES = {
+    "home": st.Page(page_home, title="Главная страница", icon="🏠", url_path="home"),
+    "teacher": st.Page(page_teacher, title="Классный руководитель", icon="🏫", url_path="teacher"),
+    "psych": st.Page(page_psych, title="Психолог", icon="🧠", url_path="psychologist"),
+    "logo": st.Page(page_logo, title="Логопед", icon="🗣️", url_path="speech_therapist"),
+    "def": st.Page(page_def, title="Дефектолог", icon="🎓", url_path="defectologist"),
+    "admin": st.Page(page_admin, title="Руководитель консилиума", icon="📋", url_path="admin"),
+}
 pg = st.navigation({
-    "Информация": [
-        st.Page(page_home, title="Главная страница", icon="🏠", url_path="home")
-    ],
-    "Кабинеты специалистов": [
-        st.Page(page_teacher, title="Учитель", icon="🏫", url_path="teacher"),
-        st.Page(page_psych, title="Психолог", icon="🧠", url_path="psychologist"),
-        st.Page(page_logo, title="Логопед", icon="🗣", url_path="speech_therapist"),
-        st.Page(page_def, title="Дефектолог", icon="🎓", url_path="defectologist")
-    ],
-    "Управление": [
-        st.Page(page_admin, title="Руководитель консилиума", icon="🛡️", url_path="admin")
-    ]
+    "Информация": [PAGES["home"]],
+    "Кабинеты специалистов": [PAGES[key] for key in ["teacher", "psych", "logo", "def"]],
+    "Управление": [PAGES["admin"]],
 })
-
 pg.run()
